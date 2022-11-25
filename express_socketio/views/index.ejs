@@ -1,0 +1,44 @@
+<script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
+
+<body>
+    <h2><%= room %></h2>
+    <textarea name="" id="textbox" cols="30" rows="10"></textarea>
+    <div>
+        <input type="text" id="msg">
+        <a href="#" onclick="broadcaset();">廣播</a>
+        <a href="#" onclick="leave_room();">登出聊天室</a>
+    </div>
+</body>
+<script>
+    input_text = document.querySelector('#msg')
+    connect_textbox = document.querySelector('#textbox')
+
+    let socket = io("/chat");
+
+    socket.on("chat message", function(data) {
+        let msg = document.createTextNode(data)
+        connect_textbox.appendChild(msg)
+    })
+
+    // 按 Enter 送出
+    input_text.addEventListener("keydown", function(e) {
+        console.log(e.key)
+        if (e.key === "Enter") {
+            let msg = input_text.value + "\n"
+            input_text.value = ""
+            socket.emit("chat message", msg)
+        }
+    })
+
+    function leave_room() {
+        socket.emit("left", {}, function() {
+            console.log('123')
+            socket.disconnect()
+            window.location.href = "{{url_for('room')}}"
+        })
+    }
+
+    // function broadcaset() {
+    //     socket.emit("broadcast", "I am here")
+    // }
+</script>
